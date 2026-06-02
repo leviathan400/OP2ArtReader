@@ -46,6 +46,9 @@ Partial Class fMain
         Me.mnuHelpAbout = New System.Windows.Forms.ToolStripMenuItem()
         Me.pnlCanvas = New System.Windows.Forms.Panel()
         Me.picCanvas = New System.Windows.Forms.PictureBox()
+        Me.pnlZoom = New System.Windows.Forms.Panel()
+        Me.picZoom = New System.Windows.Forms.PictureBox()
+        Me.lblZoom = New System.Windows.Forms.Label()
         Me.TabControl1 = New System.Windows.Forms.TabControl()
         Me.TabImage = New System.Windows.Forms.TabPage()
         Me.TabPicture = New System.Windows.Forms.TabPage()
@@ -60,6 +63,8 @@ Partial Class fMain
         Me.MenuStrip1.SuspendLayout()
         Me.pnlCanvas.SuspendLayout()
         CType(Me.picCanvas, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.pnlZoom.SuspendLayout()
+        CType(Me.picZoom, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.TabControl1.SuspendLayout()
         Me.StatusStrip1.SuspendLayout()
         Me.SuspendLayout()
@@ -82,30 +87,30 @@ Partial Class fMain
         'mnuFileOpen
         '
         Me.mnuFileOpen.Name = "mnuFileOpen"
-        Me.mnuFileOpen.Size = New System.Drawing.Size(180, 22)
+        Me.mnuFileOpen.Size = New System.Drawing.Size(186, 22)
         Me.mnuFileOpen.Text = "Open OP2 Folder..."
         '
         'mnuFileSaveCurrent
         '
         Me.mnuFileSaveCurrent.Name = "mnuFileSaveCurrent"
-        Me.mnuFileSaveCurrent.Size = New System.Drawing.Size(180, 22)
+        Me.mnuFileSaveCurrent.Size = New System.Drawing.Size(186, 22)
         Me.mnuFileSaveCurrent.Text = "Save Current Image..."
         '
         'mnuFileBatchSave
         '
         Me.mnuFileBatchSave.Name = "mnuFileBatchSave"
-        Me.mnuFileBatchSave.Size = New System.Drawing.Size(180, 22)
+        Me.mnuFileBatchSave.Size = New System.Drawing.Size(186, 22)
         Me.mnuFileBatchSave.Text = "Batch Save..."
         '
         'mnuFileSep1
         '
         Me.mnuFileSep1.Name = "mnuFileSep1"
-        Me.mnuFileSep1.Size = New System.Drawing.Size(177, 6)
+        Me.mnuFileSep1.Size = New System.Drawing.Size(183, 6)
         '
         'mnuFileExit
         '
         Me.mnuFileExit.Name = "mnuFileExit"
-        Me.mnuFileExit.Size = New System.Drawing.Size(180, 22)
+        Me.mnuFileExit.Size = New System.Drawing.Size(186, 22)
         Me.mnuFileExit.Text = "Exit"
         '
         'mnuSelect
@@ -176,19 +181,19 @@ Partial Class fMain
         '
         Me.mnuBackground.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuBgGray, Me.mnuBgOrange})
         Me.mnuBackground.Name = "mnuBackground"
-        Me.mnuBackground.Size = New System.Drawing.Size(180, 22)
+        Me.mnuBackground.Size = New System.Drawing.Size(170, 22)
         Me.mnuBackground.Text = "Background Color"
         '
         'mnuBgGray
         '
         Me.mnuBgGray.Name = "mnuBgGray"
-        Me.mnuBgGray.Size = New System.Drawing.Size(180, 22)
+        Me.mnuBgGray.Size = New System.Drawing.Size(113, 22)
         Me.mnuBgGray.Text = "Gray"
         '
         'mnuBgOrange
         '
         Me.mnuBgOrange.Name = "mnuBgOrange"
-        Me.mnuBgOrange.Size = New System.Drawing.Size(180, 22)
+        Me.mnuBgOrange.Size = New System.Drawing.Size(113, 22)
         Me.mnuBgOrange.Text = "Orange"
         '
         'mnuHelp
@@ -201,7 +206,7 @@ Partial Class fMain
         'mnuHelpAbout
         '
         Me.mnuHelpAbout.Name = "mnuHelpAbout"
-        Me.mnuHelpAbout.Size = New System.Drawing.Size(180, 22)
+        Me.mnuHelpAbout.Size = New System.Drawing.Size(107, 22)
         Me.mnuHelpAbout.Text = "About"
         '
         'pnlCanvas
@@ -212,7 +217,7 @@ Partial Class fMain
         Me.pnlCanvas.Controls.Add(Me.picCanvas)
         Me.pnlCanvas.Location = New System.Drawing.Point(12, 30)
         Me.pnlCanvas.Name = "pnlCanvas"
-        Me.pnlCanvas.Size = New System.Drawing.Size(450, 460)
+        Me.pnlCanvas.Size = New System.Drawing.Size(450, 217)
         Me.pnlCanvas.TabIndex = 1
         '
         'picCanvas
@@ -225,6 +230,35 @@ Partial Class fMain
         Me.picCanvas.TabIndex = 0
         Me.picCanvas.TabStop = False
         '
+        'pnlZoom
+        '
+        Me.pnlZoom.AutoScroll = True
+        Me.pnlZoom.BackColor = System.Drawing.Color.FromArgb(CType(CType(96, Byte), Integer), CType(CType(96, Byte), Integer), CType(CType(96, Byte), Integer))
+        Me.pnlZoom.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
+        Me.pnlZoom.Controls.Add(Me.picZoom)
+        Me.pnlZoom.Location = New System.Drawing.Point(12, 268)
+        Me.pnlZoom.Name = "pnlZoom"
+        Me.pnlZoom.Size = New System.Drawing.Size(450, 258)
+        Me.pnlZoom.TabIndex = 12
+        '
+        'picZoom
+        '
+        Me.picZoom.BackColor = System.Drawing.Color.Transparent
+        Me.picZoom.Location = New System.Drawing.Point(0, 0)
+        Me.picZoom.Name = "picZoom"
+        Me.picZoom.Size = New System.Drawing.Size(100, 50)
+        Me.picZoom.TabIndex = 0
+        Me.picZoom.TabStop = False
+        '
+        'lblZoom
+        '
+        Me.lblZoom.AutoSize = True
+        Me.lblZoom.Location = New System.Drawing.Point(12, 250)
+        Me.lblZoom.Name = "lblZoom"
+        Me.lblZoom.Size = New System.Drawing.Size(71, 13)
+        Me.lblZoom.TabIndex = 11
+        Me.lblZoom.Text = "Zoomed view"
+        '
         'TabControl1
         '
         Me.TabControl1.Controls.Add(Me.TabImage)
@@ -234,7 +268,7 @@ Partial Class fMain
         Me.TabControl1.Location = New System.Drawing.Point(478, 130)
         Me.TabControl1.Name = "TabControl1"
         Me.TabControl1.SelectedIndex = 0
-        Me.TabControl1.Size = New System.Drawing.Size(424, 360)
+        Me.TabControl1.Size = New System.Drawing.Size(424, 396)
         Me.TabControl1.TabIndex = 2
         '
         'TabImage
@@ -242,7 +276,7 @@ Partial Class fMain
         Me.TabImage.Location = New System.Drawing.Point(4, 22)
         Me.TabImage.Name = "TabImage"
         Me.TabImage.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabImage.Size = New System.Drawing.Size(416, 334)
+        Me.TabImage.Size = New System.Drawing.Size(416, 370)
         Me.TabImage.TabIndex = 0
         Me.TabImage.Text = "Image"
         Me.TabImage.UseVisualStyleBackColor = True
@@ -282,7 +316,7 @@ Partial Class fMain
         Me.lblLoadedImages.AutoSize = True
         Me.lblLoadedImages.Location = New System.Drawing.Point(478, 35)
         Me.lblLoadedImages.Name = "lblLoadedImages"
-        Me.lblLoadedImages.Size = New System.Drawing.Size(87, 13)
+        Me.lblLoadedImages.Size = New System.Drawing.Size(89, 13)
         Me.lblLoadedImages.TabIndex = 3
         Me.lblLoadedImages.Text = "Loaded Images: -"
         '
@@ -291,7 +325,7 @@ Partial Class fMain
         Me.lblPictures.AutoSize = True
         Me.lblPictures.Location = New System.Drawing.Point(478, 55)
         Me.lblPictures.Name = "lblPictures"
-        Me.lblPictures.Size = New System.Drawing.Size(55, 13)
+        Me.lblPictures.Size = New System.Drawing.Size(54, 13)
         Me.lblPictures.TabIndex = 4
         Me.lblPictures.Text = "Pictures: -"
         '
@@ -300,7 +334,7 @@ Partial Class fMain
         Me.lblFrames.AutoSize = True
         Me.lblFrames.Location = New System.Drawing.Point(478, 75)
         Me.lblFrames.Name = "lblFrames"
-        Me.lblFrames.Size = New System.Drawing.Size(51, 13)
+        Me.lblFrames.Size = New System.Drawing.Size(50, 13)
         Me.lblFrames.TabIndex = 5
         Me.lblFrames.Text = "Frames: -"
         '
@@ -309,14 +343,14 @@ Partial Class fMain
         Me.lblGroups.AutoSize = True
         Me.lblGroups.Location = New System.Drawing.Point(478, 95)
         Me.lblGroups.Name = "lblGroups"
-        Me.lblGroups.Size = New System.Drawing.Size(51, 13)
+        Me.lblGroups.Size = New System.Drawing.Size(50, 13)
         Me.lblGroups.TabIndex = 6
         Me.lblGroups.Text = "Groups: -"
         '
         'StatusStrip1
         '
         Me.StatusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.lblImageInfo})
-        Me.StatusStrip1.Location = New System.Drawing.Point(0, 495)
+        Me.StatusStrip1.Location = New System.Drawing.Point(0, 540)
         Me.StatusStrip1.Name = "StatusStrip1"
         Me.StatusStrip1.Size = New System.Drawing.Size(914, 22)
         Me.StatusStrip1.TabIndex = 7
@@ -324,20 +358,22 @@ Partial Class fMain
         'lblImageInfo
         '
         Me.lblImageInfo.Name = "lblImageInfo"
-        Me.lblImageInfo.Size = New System.Drawing.Size(118, 17)
+        Me.lblImageInfo.Size = New System.Drawing.Size(39, 17)
         Me.lblImageInfo.Text = "Ready"
         '
         'fMain
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(914, 517)
+        Me.ClientSize = New System.Drawing.Size(914, 562)
         Me.Controls.Add(Me.StatusStrip1)
         Me.Controls.Add(Me.lblGroups)
         Me.Controls.Add(Me.lblFrames)
         Me.Controls.Add(Me.lblPictures)
         Me.Controls.Add(Me.lblLoadedImages)
         Me.Controls.Add(Me.TabControl1)
+        Me.Controls.Add(Me.lblZoom)
+        Me.Controls.Add(Me.pnlZoom)
         Me.Controls.Add(Me.pnlCanvas)
         Me.Controls.Add(Me.MenuStrip1)
         Me.MainMenuStrip = Me.MenuStrip1
@@ -348,6 +384,8 @@ Partial Class fMain
         Me.pnlCanvas.ResumeLayout(False)
         Me.pnlCanvas.PerformLayout()
         CType(Me.picCanvas, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.pnlZoom.ResumeLayout(False)
+        CType(Me.picZoom, System.ComponentModel.ISupportInitialize).EndInit()
         Me.TabControl1.ResumeLayout(False)
         Me.StatusStrip1.ResumeLayout(False)
         Me.StatusStrip1.PerformLayout()
@@ -380,6 +418,9 @@ Partial Class fMain
     Friend WithEvents mnuHelpAbout As ToolStripMenuItem
     Friend WithEvents pnlCanvas As Panel
     Friend WithEvents picCanvas As PictureBox
+    Friend WithEvents pnlZoom As Panel
+    Friend WithEvents picZoom As PictureBox
+    Friend WithEvents lblZoom As Label
     Friend WithEvents TabControl1 As TabControl
     Friend WithEvents TabImage As TabPage
     Friend WithEvents TabPicture As TabPage

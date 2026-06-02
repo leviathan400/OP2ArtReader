@@ -1,4 +1,6 @@
-# OP2 Art Viewer (op2artreader)
+# OP2ArtReader
+
+![Screenshot](https://images.outpostuniverse.org/OP2ArtReader.png)
 
 A modern re-creation of the original **op2art Viewer 3.0** (2005, by Cynex) for
 **Outpost 2: Divided Destiny**. It reads the game's art files (`OP2_ART.BMP` +
@@ -7,8 +9,6 @@ animation group.
 
 Written in VB.NET targeting **.NET Framework 4.8** (Windows Forms).
 
-![Outpost 2 Art Viewer](docs/screenshot.png)
-
 ## Features
 
 - **Browse the full art hierarchy** via four tabs:
@@ -16,6 +16,8 @@ Written in VB.NET targeting **.NET Framework 4.8** (Windows Forms).
   - **Picture** – an image plus its position within a frame.
   - **Frame** – multiple pictures composited together (correct draw order + transparency).
   - **Group** – an animation: a sequence of frames, with a selection rectangle and centre.
+- **Dual render** – the left side shows the selected art at **1:1**, with a second
+  **2× zoomed view** below it (crisp nearest-neighbour, scrolls when larger than the panel).
 - **Group animation** – plays automatically on the Group tab (toggle **Animate**),
   or step frames manually with **Frame in group**.
 - **Group overlays** (faithful to the original):

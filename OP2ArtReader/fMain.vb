@@ -55,6 +55,12 @@ Public Class fMain
     Private filesLoaded As Boolean = False
     Private suppressEvents As Boolean = False
 
+    ' Bitmap currently shown in the main canvas, mirrored into the zoomed second view.
+    Private zoomSource As Bitmap
+
+    ' Magnification of the second (zoomed) render: 2x the original pixel size.
+    Private Const ZoomFactor As Integer = 2
+
     ' Settings persisted to op2art.ini next to the executable.
     Private ini As CIni
     Private ReadOnly iniPath As String = IO.Path.Combine(Application.StartupPath, "op2art.ini")
@@ -464,7 +470,33 @@ Public Class fMain
             lblImageInfo.Text = "Render error: " & ex.Message
         End Try
 
+        ' Refresh the zoomed second view (shares the same bitmap as the main canvas).
+        zoomSource = picCanvas.Image
+        Dim zw As Integer = If(zoomSource IsNot Nothing, zoomSource.Width, 1) * ZoomFactor
+        Dim zh As Integer = If(zoomSource IsNot Nothing, zoomSource.Height, 1) * ZoomFactor
+        picZoom.Size = New Size(Math.Max(1, zw), Math.Max(1, zh))
+        lblZoom.Text = $"Zoomed view — {ZoomFactor}x"
+        picZoom.Invalidate()
+
         BuildInfoTree(kind)
+    End Sub
+
+    ''' <summary>
+    ''' Paints the magnified second view at a fixed integer zoom (2x), crisp
+    ''' nearest-neighbour. The panel scrolls when the result is larger than it.
+    ''' </summary>
+    Private Sub picZoom_Paint(sender As Object, e As PaintEventArgs) Handles picZoom.Paint
+        If zoomSource Is Nothing Then Return
+        Dim artW As Integer = zoomSource.Width, artH As Integer = zoomSource.Height
+        If artW <= 0 OrElse artH <= 0 Then Return
+
+        e.Graphics.InterpolationMode = Drawing2D.InterpolationMode.NearestNeighbor
+        e.Graphics.PixelOffsetMode = Drawing2D.PixelOffsetMode.Half
+        Try
+            e.Graphics.DrawImage(zoomSource, New Rectangle(0, 0, artW * ZoomFactor, artH * ZoomFactor))
+        Catch
+            ' bitmap may have been disposed mid-repaint; ignore, next render repaints
+        End Try
     End Sub
 
     ''' <summary>
@@ -708,6 +740,9 @@ Public Class fMain
     ''' <summary>Applies the canvas background colour and updates the menu check marks.</summary>
     Private Sub SetBackground(c As Color)
         pnlCanvas.BackColor = c
+        pnlZoom.BackColor = c
+        picZoom.BackColor = c
+        picZoom.Invalidate()
         mnuBgOrange.Checked = (c.ToArgb() = BgOrange.ToArgb())
         mnuBgGray.Checked = Not mnuBgOrange.Checked
     End Sub
