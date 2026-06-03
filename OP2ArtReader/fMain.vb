@@ -2,6 +2,7 @@ Imports System.IO
 Imports System.Drawing
 
 ' OP2ArtReader
+' https://github.com/leviathan400/OP2ArtReader
 '
 ' Outpost 2 art reader. Application to view all of the sprites within the OP2_ART files.
 ' Re-creation of the original op2art Viewer v3.0 (2005, Cynex).
@@ -9,12 +10,17 @@ Imports System.Drawing
 ' Follow on from OP2Graphics project        https://forum.outpost2.net/index.php?topic=1593
 ' and Recreating the op2art Viewer:         https://forum.outpost2.net/index.php/topic=1635
 '
+'
 ' Outpost 2: Divided Destiny is a real-time strategy video game released in 1997.
 
 Public Class fMain
 
-    Private ApplicationName As String = "OP2ArtReader"
-    Private Version As String = "0.5"
+    Public Const ApplicationName As String = "OP2ArtReader"
+    Public Const ApplicationVersion As String = "0.8.0"
+    Public Const ApplicationBuild As String = "0020"
+    Public Const ApplicationDescription As String = "Outpost 2: Divided Destiny art reader."
+    Public Const ApplicationCopyright As String = "Outpost Universe © 2025-2026"
+    Public Const ApplicationWebsite As String = "https://github.com/leviathan400/OP2ArtReader"
 
 #Region "Class Declarations"
     ' Art file paths
@@ -64,6 +70,12 @@ Public Class fMain
     ' Settings persisted to op2art.ini next to the executable.
     Private ini As CIni
     Private ReadOnly iniPath As String = IO.Path.Combine(Application.StartupPath, "op2art.ini")
+
+    ' Optional group -> unit/building name map (op2art_names.ini, [GroupNames]
+    ' section: "<group>=<label>"). Generated from the Outpost2.exe decompile; lets
+    ' the viewer show which unit/building a group belongs to. Absent file = no names.
+    Private groupNames As CIni
+    Private ReadOnly groupNamesPath As String = IO.Path.Combine(Application.StartupPath, "op2art_names.ini")
 #End Region
 
 #Region "Initialization"
@@ -82,6 +94,9 @@ Public Class fMain
         ' Load persisted settings (op2art.ini) and apply view toggles.
         ini = New CIni(iniPath)
         LoadIniSettings()
+
+        ' Load the optional group->name map (units/buildings).
+        groupNames = New CIni(groupNamesPath)
 
         If String.IsNullOrEmpty(My.Settings.OP2Path) Then
             Debug.WriteLine("First Run")
@@ -116,12 +131,8 @@ Public Class fMain
         Next
         If chkAnimate IsNot Nothing Then chkAnimate.Checked = ini.GetBool("Art Select", "Animate", True)
 
-        ' Canvas background colour ("Gray" default, or "Orange").
-        If ini.GetString("Art Select", "Background", "Gray").Equals("Orange", StringComparison.OrdinalIgnoreCase) Then
-            SetBackground(BgOrange)
-        Else
-            SetBackground(BgGray)
-        End If
+        ' Canvas background colour (Gray default; Orange / Brown / Green).
+        SetBackground(BackgroundByName(ini.GetString("Art Select", "Background", "Gray")))
 
         ' Window position, if previously saved and on-screen.
         Dim wp = ini.GetString("Main", "WindowPos", "")
@@ -175,7 +186,7 @@ Public Class fMain
         ini.SetValue("Art Select", "Group", CInt(numSel(EntityKind.Group).Value))
         ini.SetValue("Art Select", "AutoUpdate", chkAuto(EntityKind.Image).Checked)
         ini.SetValue("Art Select", "Animate", If(chkAnimate IsNot Nothing, chkAnimate.Checked, True))
-        ini.SetValue("Art Select", "Background", If(mnuBgOrange.Checked, "Orange", "Gray"))
+        ini.SetValue("Art Select", "Background", CurrentBackgroundName)
         ini.SetValue("Art Select", "ShowInfo", mnuShowInfo.Checked)
         ini.SetValue("Art Select", "DrawGroupBorders", mnuDrawBorders.Checked)
         ini.SetValue("Art Select", "DrawGroupLights", mnuDrawLights.Checked)
@@ -362,6 +373,8 @@ Public Class fMain
         suppressEvents = True
         numGroupFrame.Maximum = Math.Max(0, n - 1)
         If numGroupFrame.Value > numGroupFrame.Maximum Then numGroupFrame.Value = numGroupFrame.Maximum
+        ' Animation only makes sense with more than one frame.
+        chkAnimate.Enabled = (n > 1)
         suppressEvents = False
     End Sub
 
@@ -463,7 +476,8 @@ Public Class fMain
                         DrawGroupOverlays(comp, g)
                         picCanvas.Image = comp.Bitmap
                     End If
-                    lblImageInfo.Text = $"Group {g}: frame {fo + 1}/{prtFile.NumFramesInGroup(g)}  Sel({prtFile.GroupSelLeft(g)},{prtFile.GroupSelTop(g)},{prtFile.GroupSelRight(g)},{prtFile.GroupSelBottom(g)})"
+                    Dim gName As String = If(groupNames IsNot Nothing, groupNames.GetString("GroupNames", g.ToString()), "")
+                    lblImageInfo.Text = $"Group {g}: frame {fo + 1}/{prtFile.NumFramesInGroup(g)}  Sel({prtFile.GroupSelLeft(g)},{prtFile.GroupSelTop(g)},{prtFile.GroupSelRight(g)},{prtFile.GroupSelBottom(g)})" & If(gName <> "", "   —   " & gName, "")
             End Select
         Catch ex As Exception
             Debug.WriteLine("RenderCurrent error: " & ex.Message)
@@ -720,8 +734,14 @@ Public Class fMain
     End Sub
 
     Private Sub mnuHelpAbout_Click(sender As Object, e As EventArgs) Handles mnuHelpAbout.Click
-        Using dlg As New fAbout()
-            dlg.ShowDialog(Me)
+        Using AboutForm As New fAbout()
+            AboutForm.ApplicationTitle = ApplicationName
+            AboutForm.ApplicationVersion = ApplicationVersion
+            AboutForm.ApplicationBuild = ApplicationBuild
+            AboutForm.ApplicationDescription = ApplicationDescription
+            AboutForm.ApplicationCopyright = ApplicationCopyright
+            AboutForm.ApplicationWebsite = ApplicationWebsite
+            AboutForm.ShowDialog(Me)
         End Using
     End Sub
 
@@ -729,6 +749,8 @@ Public Class fMain
     ' used behind group/image renders; Gray is this viewer's default.
     Private Shared ReadOnly BgGray As Color = Color.FromArgb(96, 96, 96)
     Private Shared ReadOnly BgOrange As Color = Color.FromArgb(255, 127, 0)
+    Private Shared ReadOnly BgBrown As Color = Color.FromArgb(120, 80, 40)
+    Private Shared ReadOnly BgGreen As Color = Color.FromArgb(40, 110, 40)
 
     Private Sub mnuBgGray_Click(sender As Object, e As EventArgs) Handles mnuBgGray.Click
         SetBackground(BgGray)
@@ -736,6 +758,32 @@ Public Class fMain
     Private Sub mnuBgOrange_Click(sender As Object, e As EventArgs) Handles mnuBgOrange.Click
         SetBackground(BgOrange)
     End Sub
+    Private Sub mnuBgBrown_Click(sender As Object, e As EventArgs) Handles mnuBgBrown.Click
+        SetBackground(BgBrown)
+    End Sub
+    Private Sub mnuBgGreen_Click(sender As Object, e As EventArgs) Handles mnuBgGreen.Click
+        SetBackground(BgGreen)
+    End Sub
+
+    ''' <summary>Maps a saved background name to its colour (defaults to Gray).</summary>
+    Private Shared Function BackgroundByName(name As String) As Color
+        Select Case If(name, "").Trim().ToLowerInvariant()
+            Case "orange" : Return BgOrange
+            Case "brown" : Return BgBrown
+            Case "green" : Return BgGreen
+            Case Else : Return BgGray
+        End Select
+    End Function
+
+    ''' <summary>The name of the currently selected background colour, for persistence.</summary>
+    Private ReadOnly Property CurrentBackgroundName As String
+        Get
+            If mnuBgOrange.Checked Then Return "Orange"
+            If mnuBgBrown.Checked Then Return "Brown"
+            If mnuBgGreen.Checked Then Return "Green"
+            Return "Gray"
+        End Get
+    End Property
 
     ''' <summary>Applies the canvas background colour and updates the menu check marks.</summary>
     Private Sub SetBackground(c As Color)
@@ -743,8 +791,11 @@ Public Class fMain
         pnlZoom.BackColor = c
         picZoom.BackColor = c
         picZoom.Invalidate()
-        mnuBgOrange.Checked = (c.ToArgb() = BgOrange.ToArgb())
-        mnuBgGray.Checked = Not mnuBgOrange.Checked
+        Dim argb As Integer = c.ToArgb()
+        mnuBgGray.Checked = (argb = BgGray.ToArgb())
+        mnuBgOrange.Checked = (argb = BgOrange.ToArgb())
+        mnuBgBrown.Checked = (argb = BgBrown.ToArgb())
+        mnuBgGreen.Checked = (argb = BgGreen.ToArgb())
     End Sub
 #End Region
 

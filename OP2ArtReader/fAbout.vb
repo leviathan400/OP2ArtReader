@@ -1,47 +1,96 @@
-Imports System.Drawing
-Imports System.Windows.Forms
+Imports System.Diagnostics
 
-''' <summary>
-''' About dialog, reproducing the original op2art Viewer's about box and crediting
-''' both this re-creation and the original author.
-''' </summary>
+' OP2 Tools - About Form
+' Reusable About dialog for OP2 VB.NET projects
+'
+' To use in your project:
+' 1. Copy fAbout.vb and fAbout.Designer.vb to your project
+' 2. Add a banner image resource named "banner01_620x100" (620x100 pixels)
+' 3. Set your application icon resource
+' 4. Call: fAbout.ShowAbout("App Name", "1.0.0", "0001", Me)
+'    Or simply: Dim about As New fAbout() : about.ShowDialog(Me)
 Public Class fAbout
-    Inherits Form
 
-    Public Sub New()
-        Me.Text = "About OP2 Art Viewer"
-        Me.FormBorderStyle = FormBorderStyle.FixedDialog
-        Me.MaximizeBox = False
-        Me.MinimizeBox = False
-        Me.StartPosition = FormStartPosition.CenterParent
-        Me.ClientSize = New Size(380, 160)
-        Me.ShowInTaskbar = False
+    ' Customizable properties - set these before showing the form
+    ' or use the shared ShowAbout method
+    Public Property ApplicationTitle As String = "OP2 Tool"
+    Public Property ApplicationVersion As String = "1.0.0"
+    Public Property ApplicationBuild As String = "0001"
+    Public Property ApplicationDescription As String = "An Outpost 2 tool."
+    Public Property ApplicationCopyright As String = "Outpost Universe © 2025"
+    Public Property ApplicationWebsite As String = "https://outpost2.net"
 
-        Dim lblTitle As New Label With {
-            .Text = "OP2 Art Viewer",
-            .Font = New Font("Segoe UI", 12.0F, FontStyle.Bold),
-            .Location = New Point(20, 18),
-            .AutoSize = True
-        }
-        Me.Controls.Add(lblTitle)
+    ''' <summary>
+    ''' Convenience method to show the About dialog with custom values
+    ''' </summary>
+    Public Shared Sub ShowAbout(title As String, version As String, build As String, owner As Form,
+                                 Optional description As String = Nothing,
+                                 Optional copyright As String = Nothing,
+                                 Optional website As String = Nothing)
+        Using about As New fAbout()
+            about.ApplicationTitle = title
+            about.ApplicationVersion = version
+            about.ApplicationBuild = build
 
-        Dim lblBody As New Label With {
-            .Text = "A re-creation of the original op2art-Viewer 3.0." & vbCrLf &
-                    "Original Copyright (C) 2005 by Cynex." & vbCrLf & vbCrLf &
-                    "Outpost 2: Divided Destiny art file viewer." & vbCrLf &
-                    "Reads OP2_ART.BMP + op2_art.prt.",
-            .Location = New Point(22, 50),
-            .AutoSize = True
-        }
-        Me.Controls.Add(lblBody)
+            If description IsNot Nothing Then about.ApplicationDescription = description
+            If copyright IsNot Nothing Then about.ApplicationCopyright = copyright
+            If website IsNot Nothing Then about.ApplicationWebsite = website
 
-        Dim btnOk As New Button With {
-            .Text = "OK",
-            .DialogResult = DialogResult.OK,
-            .Location = New Point(285, 125),
-            .Width = 80
-        }
-        Me.Controls.Add(btnOk)
-        Me.AcceptButton = btnOk
+            about.ShowDialog(owner)
+        End Using
     End Sub
+
+    Private Sub fAbout_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        ' Set form properties
+        Me.Text = "About " & ApplicationTitle
+
+        ' Try to set icon from resources (customize resource name as needed)
+        Try
+            Me.Icon = My.Resources.dynamics2
+        Catch
+            ' Icon resource not found, use default
+        End Try
+
+        ' Set banner image
+        Try
+            panelBanner.BackgroundImage = My.Resources.banner03_620x100
+            panelBanner.BackgroundImageLayout = ImageLayout.Zoom
+        Catch
+            ' Banner resource not found, keep default color
+        End Try
+
+        ' Set labels
+        lblAppName.Text = ApplicationTitle
+        lblVersion.Text = "Version " & ApplicationVersion & " (Build " & ApplicationBuild & ")"
+        lblDescription.Text = ApplicationDescription
+        lblCopyright.Text = ApplicationCopyright
+
+        ' Set website link
+        If Not String.IsNullOrWhiteSpace(ApplicationWebsite) Then
+            linkWebsite.Text = ApplicationWebsite
+            linkWebsite.Visible = True
+        Else
+            linkWebsite.Visible = False
+        End If
+
+        ' Set focus to OK button so Enter closes the form
+        Me.ActiveControl = btnOK
+
+        Debug.WriteLine("About Form Loaded")
+    End Sub
+
+    Private Sub linkWebsite_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles linkWebsite.LinkClicked
+        Try
+            Process.Start(New ProcessStartInfo(ApplicationWebsite) With {.UseShellExecute = True})
+        Catch ex As Exception
+            ' Failed to open URL
+            MessageBox.Show("Could not open the website: " & ex.Message, "Error",
+                          MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+    Private Sub btnOK_Click(sender As Object, e As EventArgs) Handles btnOK.Click
+        Me.Close()
+    End Sub
+
 End Class

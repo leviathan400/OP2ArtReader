@@ -50,6 +50,9 @@
   <PropertyGroup>
     <ApplicationIcon>Resources\dynamics2.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>My Project\app.manifest</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -106,13 +109,25 @@
     <Compile Include="fAbout.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="fAbout.Designer.vb">
+      <DependentUpon>fAbout.vb</DependentUpon>
+    </Compile>
     <Compile Include="fBatchSave.vb">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fBatchSave.Designer.vb">
+      <DependentUpon>fBatchSave.vb</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="fMain.resx">
       <DependentUpon>fMain.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fAbout.resx">
+      <DependentUpon>fAbout.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fBatchSave.resx">
+      <DependentUpon>fBatchSave.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="My Project\Resources.resx">
       <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
@@ -122,6 +137,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="My Project\app.manifest" />
     <None Include="My Project\Application.myapp">
       <Generator>MyApplicationCodeGenerator</Generator>
       <LastGenOutput>Application.Designer.vb</LastGenOutput>
@@ -135,6 +151,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\dynamics2.ico" />
+    <None Include="Resources\banner03_620x100.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

@@ -10,31 +10,43 @@ Imports System.Windows.Forms
 ''' (32 / 24 / 16 / "8 or 1"), with an option to adjust frames to the upper-left corner.
 ''' </summary>
 Public Class fBatchSave
-    Inherits Form
 
     Private ReadOnly prt As CPrtFile
     Private ReadOnly ini As CIni
-
-    Private rbImages, rbFrames, rbGroups As RadioButton
-    Private lblImagesN, lblPicturesN, lblFramesN, lblGroupsN As Label
-    Private lblRange As Label
-    Private txtRange As TextBox
-    Private txtFolder As TextBox
-    Private btnBrowse, btnStart, btnClose As Button
-    Private rb32, rb24, rb16, rb8 As RadioButton
-    Private chkAdjust As CheckBox
-    Private bar As ProgressBar
-    Private lblStatus As Label
     Private cancelRequested As Boolean = False
     Private running As Boolean = False
 
     Private Shared ReadOnly TransparentKey As Color = Color.FromArgb(255, 255, 0, 255) ' magenta
 
+    ''' <summary>Parameterless constructor required by the Windows Forms designer.</summary>
+    Public Sub New()
+        InitializeComponent()
+    End Sub
+
     Public Sub New(prtFile As CPrtFile, settings As CIni)
+        InitializeComponent()
         prt = prtFile
         ini = settings
-        BuildUi()
+        WireEvents()
+
+        ' Counts (right side), like the original.
+        lblImagesN.Text = $"Images:   0 - {prt.NumImages - 1}"
+        lblPicturesN.Text = $"Pictures: 0 - {prt.NumPictures - 1}"
+        lblFramesN.Text = $"Frames:   0 - {prt.NumFrames - 1}"
+        lblGroupsN.Text = $"Groups:   0 - {prt.NumGroups - 1}"
+
+        OnWhatChanged(Nothing, EventArgs.Empty)
         LoadSettings()
+    End Sub
+
+    ''' <summary>Attaches event handlers at runtime (kept out of the designer).</summary>
+    Private Sub WireEvents()
+        AddHandler rbImages.CheckedChanged, AddressOf OnWhatChanged
+        AddHandler rbFrames.CheckedChanged, AddressOf OnWhatChanged
+        AddHandler rbGroups.CheckedChanged, AddressOf OnWhatChanged
+        AddHandler btnBrowse.Click, AddressOf OnBrowse
+        AddHandler btnStart.Click, AddressOf OnStart
+        AddHandler btnClose.Click, Sub() If running Then cancelRequested = True Else Me.Close()
     End Sub
 
     ''' <summary>Restores the last-used folder, depth and adjust option from op2art.ini.</summary>
@@ -57,69 +69,6 @@ Public Class fBatchSave
         ini.SetValue("Batch Save", "ColorDepth", depth)
         ini.SetValue("Batch Save", "AdjustGroups", chkAdjust.Checked)
         ini.Save()
-    End Sub
-
-    Private Sub BuildUi()
-        Me.Text = "Batch Save Objects"
-        Me.FormBorderStyle = FormBorderStyle.FixedDialog
-        Me.MaximizeBox = False : Me.MinimizeBox = False
-        Me.StartPosition = FormStartPosition.CenterParent
-        Me.ClientSize = New Size(470, 300)
-        Me.ShowInTaskbar = False
-
-        ' What to save.
-        rbImages = New RadioButton With {.Text = "Save Images", .Location = New Point(14, 14), .AutoSize = True, .Checked = True}
-        rbFrames = New RadioButton With {.Text = "Save Frames", .Location = New Point(14, 38), .AutoSize = True}
-        rbGroups = New RadioButton With {.Text = "Save Groups", .Location = New Point(14, 62), .AutoSize = True}
-        For Each rb In {rbImages, rbFrames, rbGroups}
-            AddHandler rb.CheckedChanged, AddressOf OnWhatChanged
-            Me.Controls.Add(rb)
-        Next
-
-        ' Counts (right side), like the original.
-        lblImagesN = New Label With {.Location = New Point(250, 14), .AutoSize = True}
-        lblPicturesN = New Label With {.Location = New Point(250, 34), .AutoSize = True}
-        lblFramesN = New Label With {.Location = New Point(250, 54), .AutoSize = True}
-        lblGroupsN = New Label With {.Location = New Point(250, 74), .AutoSize = True}
-        lblImagesN.Text = $"Images:   0 - {prt.NumImages - 1}"
-        lblPicturesN.Text = $"Pictures: 0 - {prt.NumPictures - 1}"
-        lblFramesN.Text = $"Frames:   0 - {prt.NumFrames - 1}"
-        lblGroupsN.Text = $"Groups:   0 - {prt.NumGroups - 1}"
-        Me.Controls.AddRange({lblImagesN, lblPicturesN, lblFramesN, lblGroupsN})
-
-        ' Range.
-        lblRange = New Label With {.Text = "Select Image Range:", .Location = New Point(14, 96), .AutoSize = True}
-        txtRange = New TextBox With {.Location = New Point(14, 114), .Width = 442}
-        Me.Controls.AddRange({lblRange, txtRange})
-
-        ' Folder.
-        Dim lblDir As New Label With {.Text = "Save Directory:", .Location = New Point(14, 146), .AutoSize = True}
-        txtFolder = New TextBox With {.Location = New Point(14, 164), .Width = 360}
-        btnBrowse = New Button With {.Text = "Browse", .Location = New Point(380, 162), .Width = 76}
-        AddHandler btnBrowse.Click, AddressOf OnBrowse
-        Me.Controls.AddRange({lblDir, txtFolder, btnBrowse})
-
-        ' Colour depth.
-        Dim lblDepth As New Label With {.Text = "Save Color Depth:", .Location = New Point(14, 198), .AutoSize = True}
-        rb32 = New RadioButton With {.Text = "32", .Location = New Point(120, 196), .Width = 46, .Checked = True}
-        rb24 = New RadioButton With {.Text = "24", .Location = New Point(170, 196), .Width = 46}
-        rb16 = New RadioButton With {.Text = "16", .Location = New Point(220, 196), .Width = 46}
-        rb8 = New RadioButton With {.Text = "8 or 1", .Location = New Point(270, 196), .Width = 70}
-        Me.Controls.AddRange({lblDepth, rb32, rb24, rb16, rb8})
-
-        chkAdjust = New CheckBox With {.Text = "Adjust frames to upper-left corner", .Location = New Point(14, 222), .AutoSize = True}
-        Me.Controls.Add(chkAdjust)
-
-        ' Progress + actions.
-        bar = New ProgressBar With {.Location = New Point(14, 248), .Size = New Size(442, 16)}
-        lblStatus = New Label With {.Text = "Ready", .Location = New Point(14, 268), .AutoSize = True}
-        btnStart = New Button With {.Text = "Start", .Location = New Point(300, 266), .Width = 75}
-        btnClose = New Button With {.Text = "Cancel", .Location = New Point(381, 266), .Width = 75}
-        AddHandler btnStart.Click, AddressOf OnStart
-        AddHandler btnClose.Click, Sub() If running Then cancelRequested = True Else Me.Close()
-        Me.Controls.AddRange({bar, lblStatus, btnStart, btnClose})
-
-        OnWhatChanged(Nothing, EventArgs.Empty)
     End Sub
 
     Private Enum SaveKind

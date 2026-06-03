@@ -42,6 +42,8 @@ Partial Class fMain
         Me.mnuBackground = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuBgGray = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuBgOrange = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuBgBrown = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuBgGreen = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuHelp = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuHelpAbout = New System.Windows.Forms.ToolStripMenuItem()
         Me.pnlCanvas = New System.Windows.Forms.Panel()
@@ -179,7 +181,7 @@ Partial Class fMain
         '
         'mnuBackground
         '
-        Me.mnuBackground.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuBgGray, Me.mnuBgOrange})
+        Me.mnuBackground.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuBgGray, Me.mnuBgOrange, Me.mnuBgBrown, Me.mnuBgGreen})
         Me.mnuBackground.Name = "mnuBackground"
         Me.mnuBackground.Size = New System.Drawing.Size(170, 22)
         Me.mnuBackground.Text = "Background Color"
@@ -195,6 +197,18 @@ Partial Class fMain
         Me.mnuBgOrange.Name = "mnuBgOrange"
         Me.mnuBgOrange.Size = New System.Drawing.Size(113, 22)
         Me.mnuBgOrange.Text = "Orange"
+        '
+        'mnuBgBrown
+        '
+        Me.mnuBgBrown.Name = "mnuBgBrown"
+        Me.mnuBgBrown.Size = New System.Drawing.Size(113, 22)
+        Me.mnuBgBrown.Text = "Brown"
+        '
+        'mnuBgGreen
+        '
+        Me.mnuBgGreen.Name = "mnuBgGreen"
+        Me.mnuBgGreen.Size = New System.Drawing.Size(113, 22)
+        Me.mnuBgGreen.Text = "Green"
         '
         'mnuHelp
         '
@@ -414,6 +428,8 @@ Partial Class fMain
     Friend WithEvents mnuBackground As ToolStripMenuItem
     Friend WithEvents mnuBgGray As ToolStripMenuItem
     Friend WithEvents mnuBgOrange As ToolStripMenuItem
+    Friend WithEvents mnuBgBrown As ToolStripMenuItem
+    Friend WithEvents mnuBgGreen As ToolStripMenuItem
     Friend WithEvents mnuHelp As ToolStripMenuItem
     Friend WithEvents mnuHelpAbout As ToolStripMenuItem
     Friend WithEvents pnlCanvas As Panel

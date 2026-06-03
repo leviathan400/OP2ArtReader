@@ -28,11 +28,17 @@ Written in VB.NET targeting **.NET Framework 4.8** (Windows Forms).
 - **Batch Save** – export ranges of Images / Frames / Groups to BMP at
   **32 / 24 / 16 / "8 or 1"**-bit colour depth. Images export losslessly in their
   native indexed format (8bpp with the sprite's palette, or 1bpp for shadows).
-- **View → Background Color** – switch the canvas between **Gray** and the original
-  **Orange** (`0xFF7F00`).
+- **View → Background Color** – switch the canvas (both renders) between **Gray**,
+  the original op2art **Orange** (`0xFF7F00`), **Brown**, or **Green**.
 - **Settings persistence** – paths, last selection, view toggles, window position
   and batch-save options are saved to `op2art.ini` next to the executable
   (same section layout as the original).
+- **Group names** – if `op2art_names.ini` sits next to the exe, the Group tab's
+  status line shows which unit/building each group is (e.g. group 904 →
+  *"Cargo Truck Eden Gene Bank – dir 0"*). It's a `[GroupNames]` section of
+  `<group>=<label>` lines, generated from the Outpost2.exe decompile (the op2remake
+  `building_anim_catalog.tsv` + `unit_anim_catalog.tsv`). Optional — absent file
+  just means no names shown.
 
 ## Requirements
 
@@ -68,10 +74,10 @@ written to `..\build\OP2ArtReader.exe` (Debug) / `bin\Release\` (Release).
 |------|---------|
 | `CPrtFile.vb` | Loads `op2_art.prt` + `OP2_ART.BMP`; renders images, frames, groups. |
 | `CPalette.vb` | Reads the PRT palette chunks. |
-| `CIni.vb` | Minimal INI reader/writer for `op2art.ini`. |
-| `fMain.vb` | Main window: tabs, menus, rendering, animation. |
-| `fBatchSave.vb` | Batch export dialog. |
-| `fAbout.vb` | About box. |
+| `CIni.vb` | Minimal INI reader/writer (used for `op2art.ini` and `op2art_names.ini`). |
+| `fMain.vb` | Main window: tabs, menus, rendering, animation, group names. |
+| `fBatchSave.vb` | Batch export dialog (`fBatchSave.Designer.vb` for layout). |
+| `fAbout.vb` | About box (`fAbout.Designer.vb` for layout). |
 | `WinGDI.vb` | GDI interop for image blitting. |
 
 ## Art format notes
@@ -96,3 +102,5 @@ file structures, rendering semantics, shadow packing, and group border/lights be
 - Format documentation from the Outpost 2 community
   ([forum.outpost2.net](https://forum.outpost2.net/)).
 - This re-creation builds on the OP2Graphics / op2art recreation efforts.
+
+

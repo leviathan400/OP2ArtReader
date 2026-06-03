@@ -9,10 +9,10 @@ Imports System.Runtime.InteropServices
 ' Review the values of the assembly attributes
 
 <Assembly: AssemblyTitle("OP2ArtReader")>
-<Assembly: AssemblyDescription("")>
+<Assembly: AssemblyDescription("Outpost 2 Art Reader")>
 <Assembly: AssemblyCompany("Outpost Universe")>
 <Assembly: AssemblyProduct("OP2ArtReader")>
-<Assembly: AssemblyCopyright("Copyright ©  2025")>
+<Assembly: AssemblyCopyright("Copyright © Outpost Universe")>
 <Assembly: AssemblyTrademark("")>
 
 <Assembly: ComVisible(False)>
@@ -31,5 +31,5 @@ Imports System.Runtime.InteropServices
 ' by using the '*' as shown below:
 ' <Assembly: AssemblyVersion("1.0.*")>
 
-<Assembly: AssemblyVersion("1.0.0.0")>
-<Assembly: AssemblyFileVersion("1.0.0.0")>
+<Assembly: AssemblyVersion("0.8.0.0")>
+<Assembly: AssemblyFileVersion("0.8.0.0")>
