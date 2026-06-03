@@ -152,6 +152,7 @@
   <ItemGroup>
     <None Include="Resources\dynamics2.ico" />
     <None Include="Resources\banner03_620x100.png" />
+    <None Include="Resources\doc_grab.wav" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

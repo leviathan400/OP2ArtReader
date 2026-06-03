@@ -79,5 +79,14 @@ Namespace My.Resources
                 Return CType(obj,System.Drawing.Bitmap)
             End Get
         End Property
+
+        '''<summary>
+        '''  Looks up a localized resource of type System.IO.UnmanagedMemoryStream.
+        '''</summary>
+        Friend ReadOnly Property doc_grab() As System.IO.UnmanagedMemoryStream
+            Get
+                Return ResourceManager.GetStream("doc_grab", resourceCulture)
+            End Get
+        End Property
     End Module
 End Namespace

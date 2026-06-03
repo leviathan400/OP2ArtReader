@@ -1,5 +1,6 @@
 Imports System.IO
 Imports System.Drawing
+Imports System.Media
 
 ' OP2ArtReader
 ' https://github.com/leviathan400/OP2ArtReader
@@ -112,6 +113,9 @@ Public Class fMain
         UpdateFilePaths()
         LoadOP2ART()
         RestoreSelections()
+
+        Dim player As New SoundPlayer(My.Resources.doc_grab)
+        player.Play()
     End Sub
 
     ''' <summary>Reads settings from op2art.ini and applies them to the UI.</summary>
@@ -454,7 +458,9 @@ Public Class fMain
             Select Case kind
                 Case EntityKind.Image
                     Dim n As Integer = CInt(numSel(EntityKind.Image).Value)
-                    picCanvas.Image = prtFile.GetImage(n)
+                    ' Index 0 is transparent in every op2art view, so the canvas colour
+                    ' shows through instead of rendering as an opaque (often black) box.
+                    picCanvas.Image = prtFile.GetImageTransparent(n)
                     lblImageInfo.Text = $"Image {n}: {prtFile.ImageWidth(n)}x{prtFile.ImageHeight(n)}  Type {prtFile.ImageType(n)}  Palette {prtFile.ImagePalette(n)}"
 
                 Case EntityKind.Picture
