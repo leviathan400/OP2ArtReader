@@ -17,8 +17,8 @@ Imports System.Media
 Public Class fMain
 
     Public Const ApplicationName As String = "OP2ArtReader"
-    Public Const ApplicationVersion As String = "0.8.0"
-    Public Const ApplicationBuild As String = "0020"
+    Public Const ApplicationVersion As String = "0.9.0"
+    Public Const ApplicationBuild As String = "0026"
     Public Const ApplicationDescription As String = "Outpost 2: Divided Destiny art reader."
     Public Const ApplicationCopyright As String = "Outpost Universe © 2025-2026"
     Public Const ApplicationWebsite As String = "https://github.com/leviathan400/OP2ArtReader"
@@ -82,7 +82,7 @@ Public Class fMain
 #Region "Initialization"
     Private Sub fMain_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Debug.WriteLine("--- " & ApplicationName & " Started ---")
-        Me.Icon = My.Resources.dynamics2
+        Me.Icon = My.Resources.Tech_Colonists
         Me.Text = "Outpost 2 Art Viewer"
 
         BuildTabs()
@@ -183,11 +183,15 @@ Public Class fMain
         Dim loc As Point = If(Me.WindowState = FormWindowState.Normal, Me.Location, Me.RestoreBounds.Location)
         ini.SetValue("Main", "WindowPos", $"{loc.X},{loc.Y}")
 
-        ini.SetValue("Art Select", "Tab", TabControl1.SelectedIndex)
-        ini.SetValue("Art Select", "Image", CInt(numSel(EntityKind.Image).Value))
-        ini.SetValue("Art Select", "Picture", CInt(numSel(EntityKind.Picture).Value))
-        ini.SetValue("Art Select", "Frame", CInt(numSel(EntityKind.Frame).Value))
-        ini.SetValue("Art Select", "Group", CInt(numSel(EntityKind.Group).Value))
+        ' Only persist selections when the art loaded; otherwise the selectors are all
+        ' clamped to 0 and would overwrite the user's previous selections.
+        If filesLoaded Then
+            ini.SetValue("Art Select", "Tab", TabControl1.SelectedIndex)
+            ini.SetValue("Art Select", "Image", CInt(numSel(EntityKind.Image).Value))
+            ini.SetValue("Art Select", "Picture", CInt(numSel(EntityKind.Picture).Value))
+            ini.SetValue("Art Select", "Frame", CInt(numSel(EntityKind.Frame).Value))
+            ini.SetValue("Art Select", "Group", CInt(numSel(EntityKind.Group).Value))
+        End If
         ini.SetValue("Art Select", "AutoUpdate", chkAuto(EntityKind.Image).Checked)
         ini.SetValue("Art Select", "Animate", If(chkAnimate IsNot Nothing, chkAnimate.Checked, True))
         ini.SetValue("Art Select", "Background", CurrentBackgroundName)
@@ -477,7 +481,8 @@ Public Class fMain
                 Case EntityKind.Group
                     Dim g As Integer = CInt(numSel(EntityKind.Group).Value)
                     Dim fo As Integer = CInt(numGroupFrame.Value)
-                    Dim comp = prtFile.GetGroupComposite(g, fo)
+                    ' Stable bounds: every frame shares one canvas so the animation doesn't shift.
+                    Dim comp = prtFile.GetGroupComposite(g, fo, stableBounds:=True)
                     If comp IsNot Nothing Then
                         DrawGroupOverlays(comp, g)
                         picCanvas.Image = comp.Bitmap

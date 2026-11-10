@@ -46,7 +46,7 @@ Public Class fAbout
 
         ' Try to set icon from resources (customize resource name as needed)
         Try
-            Me.Icon = My.Resources.dynamics2
+            Me.Icon = My.Resources.Tech_Colonists
         Catch
             ' Icon resource not found, use default
         End Try

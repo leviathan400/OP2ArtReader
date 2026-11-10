@@ -301,6 +301,7 @@ Public Class CPrtFile
 
             Dim currentFrameIndex As Integer = 0
             Dim currentPictureIndex As Integer = 0
+            groupBoundsCache.Clear()
 
             ' Read in the Group data (animations)
             For i = 0 To numLoadedGroups - 1
@@ -1155,13 +1156,77 @@ Public Class CPrtFile
     ''' <summary>
     ''' Composes the frame at frameOffset within a group (an animation sequence).
     ''' </summary>
-    Public Function GetGroupComposite(groupIndex As Integer, frameOffset As Integer) As CompositeImage
+    ''' <remarks>
+    ''' When stableBounds is True, the frame is placed on a canvas sized to the union of
+    ''' every frame in the group, so logical (0,0) sits at the same pixel for all frames
+    ''' and the animation does not shift as individual frame extents change.
+    ''' </remarks>
+    Public Function GetGroupComposite(groupIndex As Integer, frameOffset As Integer, Optional stableBounds As Boolean = False) As CompositeImage
         If groupIndex < 0 OrElse groupIndex >= numLoadedGroups Then Return Nothing
         Dim count As Integer = groups(groupIndex).Header.NumFrames
         If count <= 0 Then Return New CompositeImage With {.Bitmap = New Bitmap(1, 1)}
         If frameOffset < 0 Then frameOffset = 0
         If frameOffset >= count Then frameOffset = count - 1
-        Return GetFrameComposite(groups(groupIndex).StartingFrameIndex + frameOffset)
+        Dim comp As CompositeImage = GetFrameComposite(groups(groupIndex).StartingFrameIndex + frameOffset)
+        If Not stableBounds OrElse comp Is Nothing OrElse comp.Bitmap Is Nothing Then Return comp
+
+        Dim bounds As Rectangle = GetGroupBounds(groupIndex)
+        If bounds.Width <= 0 OrElse bounds.Height <= 0 Then Return comp
+
+        Dim canvas As New Bitmap(bounds.Width, bounds.Height, PixelFormat.Format32bppArgb)
+        Using g As Graphics = Graphics.FromImage(canvas)
+            g.Clear(Color.Transparent)
+            ' Frame logical top-left is -OriginX; canvas pixel = logical - bounds.X.
+            g.DrawImageUnscaled(comp.Bitmap, -comp.OriginX - bounds.X, -comp.OriginY - bounds.Y)
+        End Using
+        comp.Bitmap.Dispose()
+        Return New CompositeImage With {.Bitmap = canvas, .OriginX = -bounds.X, .OriginY = -bounds.Y}
+    End Function
+
+    ' Cache of per-group logical bounds (union of all frames), filled on demand.
+    Private ReadOnly groupBoundsCache As New Dictionary(Of Integer, Rectangle)
+
+    ''' <summary>
+    ''' Logical bounding box of a frame's pictures (same space as picture offsets), or
+    ''' Rectangle.Empty if the frame has no drawable pictures.
+    ''' </summary>
+    Private Function FrameLogicalBounds(frameIndex As Integer) As Rectangle
+        If frameIndex < 0 OrElse frameIndex >= numLoadedFrames Then Return Rectangle.Empty
+        Dim numPics As Integer = frames(frameIndex).Header.NumPictures And &H7F
+        Dim startPic As Integer = frames(frameIndex).StartingPictureIndex
+        Dim minX As Integer = Integer.MaxValue, minY As Integer = Integer.MaxValue
+        Dim maxX As Integer = Integer.MinValue, maxY As Integer = Integer.MinValue
+        For i As Integer = 0 To numPics - 1
+            Dim p = pictures(startPic + i)
+            Dim imgIdx As Integer = p.ImageIndex
+            If imgIdx < 0 OrElse imgIdx >= numLoadedImages Then Continue For
+            minX = Math.Min(minX, p.PixelXOffset)
+            minY = Math.Min(minY, p.PixelYOffset)
+            maxX = Math.Max(maxX, p.PixelXOffset + images(imgIdx).Width)
+            maxY = Math.Max(maxY, p.PixelYOffset + images(imgIdx).Height)
+        Next
+        If minX = Integer.MaxValue Then Return Rectangle.Empty
+        Return Rectangle.FromLTRB(minX, minY, Math.Max(minX + 1, maxX), Math.Max(minY + 1, maxY))
+    End Function
+
+    ''' <summary>
+    ''' Logical bounding box covering every frame of a group (cached). Empty if the
+    ''' group has no drawable frames.
+    ''' </summary>
+    Public Function GetGroupBounds(groupIndex As Integer) As Rectangle
+        If groupIndex < 0 OrElse groupIndex >= numLoadedGroups Then Return Rectangle.Empty
+        Dim cached As Rectangle
+        If groupBoundsCache.TryGetValue(groupIndex, cached) Then Return cached
+
+        Dim result As Rectangle = Rectangle.Empty
+        Dim start As Integer = groups(groupIndex).StartingFrameIndex
+        For f As Integer = 0 To groups(groupIndex).Header.NumFrames - 1
+            Dim r As Rectangle = FrameLogicalBounds(start + f)
+            If r.IsEmpty Then Continue For
+            result = If(result.IsEmpty, r, Rectangle.Union(result, r))
+        Next
+        groupBoundsCache(groupIndex) = result
+        Return result
     End Function
 #End Region
 

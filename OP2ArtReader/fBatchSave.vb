@@ -25,6 +25,7 @@ Public Class fBatchSave
 
     Public Sub New(prtFile As CPrtFile, settings As CIni)
         InitializeComponent()
+        Me.Icon = My.Resources.Tech_Colonists
         prt = prtFile
         ini = settings
         WireEvents()
@@ -149,13 +150,42 @@ Public Class fBatchSave
         Return canvas
     End Function
 
-    ''' <summary>Flattens a 32bpp source over the magenta transparent key into 24bpp.</summary>
+    ''' <summary>
+    ''' Flattens a 32bpp source to 24bpp using the same alpha threshold as the 8bpp path:
+    ''' alpha &lt; 128 becomes the magenta transparent key, anything else keeps its RGB.
+    ''' Alpha-blending over magenta instead would tint semi-transparent shadow pixels
+    ''' purple; thresholding exports shadows as black, matching the 1bpp/8bpp output.
+    ''' </summary>
     Private Shared Function To24(src As Bitmap) As Bitmap
-        Dim flat As New Bitmap(src.Width, src.Height, PixelFormat.Format24bppRgb)
-        Using g As Graphics = Graphics.FromImage(flat)
-            g.Clear(TransparentKey)
-            g.DrawImageUnscaled(src, 0, 0)
-        End Using
+        Dim w As Integer = src.Width, h As Integer = src.Height
+        Dim sd As BitmapData = src.LockBits(New Rectangle(0, 0, w, h), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb)
+        Dim sbuf(sd.Stride * h - 1) As Byte
+        Marshal.Copy(sd.Scan0, sbuf, 0, sbuf.Length)
+        src.UnlockBits(sd)
+
+        Dim flat As New Bitmap(w, h, PixelFormat.Format24bppRgb)
+        Dim bd As BitmapData = flat.LockBits(New Rectangle(0, 0, w, h), ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb)
+        Try
+            Dim dbuf(bd.Stride * h - 1) As Byte
+            For y As Integer = 0 To h - 1
+                For x As Integer = 0 To w - 1
+                    Dim s As Integer = y * sd.Stride + x * 4
+                    Dim d As Integer = y * bd.Stride + x * 3
+                    If sbuf(s + 3) < 128 Then
+                        dbuf(d + 0) = TransparentKey.B
+                        dbuf(d + 1) = TransparentKey.G
+                        dbuf(d + 2) = TransparentKey.R
+                    Else
+                        dbuf(d + 0) = sbuf(s + 0)
+                        dbuf(d + 1) = sbuf(s + 1)
+                        dbuf(d + 2) = sbuf(s + 2)
+                    End If
+                Next
+            Next
+            Marshal.Copy(dbuf, 0, bd.Scan0, dbuf.Length)
+        Finally
+            flat.UnlockBits(bd)
+        End Try
         Return flat
     End Function
 
@@ -233,7 +263,10 @@ Public Class fBatchSave
             ElseIf rb24.Checked Then
                 Return To24(src)
             ElseIf rb16.Checked Then
-                Return src.Clone(New Rectangle(0, 0, src.Width, src.Height), PixelFormat.Format16bppRgb565)
+                ' Flatten first so transparent pixels become the magenta key (not black).
+                Using flat As Bitmap = To24(src)
+                    Return flat.Clone(New Rectangle(0, 0, flat.Width, flat.Height), PixelFormat.Format16bppRgb565)
+                End Using
             Else ' 8 or 1 for a composite
                 Dim idx As Bitmap = To8bppIndexed(src)
                 Return If(idx, To24(src))                          ' fall back to 24bpp if > 255 colours

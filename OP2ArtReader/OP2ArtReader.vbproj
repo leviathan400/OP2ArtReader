@@ -48,7 +48,7 @@
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>Resources\dynamics2.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\Tech_Colonists.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>My Project\app.manifest</ApplicationManifest>
@@ -151,6 +151,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\dynamics2.ico" />
+    <None Include="Resources\Tech_Colonists.ico" />
     <None Include="Resources\banner03_620x100.png" />
     <None Include="Resources\doc_grab.wav" />
   </ItemGroup>
